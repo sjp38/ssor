@@ -2,6 +2,7 @@ package hello
 
 import (
     "fmt"
+    "io/ioutil"
     "net/http"
 )
 
@@ -17,13 +18,22 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 }
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "signup handler")
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    fmt.Fprintf(w, "Signup handler called. method: %s, body: %s",
+            r.Method, body)
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "collector handler")
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    fmt.Fprintf(w, "Collector handler called. method: %s, body: %s",
+            r.Method, body)
 }
 
 func runeHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "rune handler")
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    fmt.Fprintf(w, "Rune handler called. method: %s, body: %s",
+            r.Method, body)
 }
