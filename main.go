@@ -1,6 +1,7 @@
 package sor
 
 import (
+    "encoding/json"
     "fmt"
     "io/ioutil"
     "net/http"
@@ -27,7 +28,12 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
     body, _ := ioutil.ReadAll(r.Body)
-    fmt.Fprintf(w, "Collector handler called. method: %s, body: %s",
+    if "POST" == r.Method {
+        var collector Collector
+        json.Unmarshal(body, &collector)
+        fmt.Fprintf(w, "parsed nick: %s\n", collector.Nickname)
+    }
+    fmt.Fprintf(w, "Collector handler called. method: %s, body: %s\n",
             r.Method, body)
 }
 
