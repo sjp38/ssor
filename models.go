@@ -17,3 +17,7 @@ type Collector struct {
     Int int `json:"int"`
     HunterClass string `json:"hunterClass"`
 }
+
+type Result struct {
+    Success string `json:"result"`
+}

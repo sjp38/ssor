@@ -39,7 +39,19 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
         json.Unmarshal(body, &collector)
-        createCollector(collector, c)
+        result := createCollector(collector, c)
+        var resp Result
+        if result {
+            resp.Success = "success"
+        } else {
+            resp.Success = "fail"
+        }
+        dat, err := json.Marshal(resp)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        fmt.Fprint(w, string(dat))
     case "PUT":
     case "GET":
     case "DEL":
