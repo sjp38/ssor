@@ -8,6 +8,7 @@ import (
     "io/ioutil"
     "log"
     "net/http"
+    "strconv"
 )
 
 func init() {
@@ -29,6 +30,18 @@ func createCollector(collector Collector, c appengine.Context) bool {
         return false
     }
     return true
+}
+
+func getCollector(id int, c appengine.Context) (*Collector, bool) {
+    encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
+    collector := &Collector{}
+
+    err := datastore.Get(c, encKey, collector)
+    if err != nil {
+        log.Println(err)
+        return collector, false
+    }
+    return collector, true
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +67,26 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Fprint(w, string(dat))
     case "PUT":
     case "GET":
+        id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
+        collector, succeed := getCollector(id, c)
+        if false == succeed {
+            var resp Result
+            resp.Success = "fail"
+            dat, err := json.Marshal(resp)
+            if err != nil {
+                log.Println(err)
+                return
+            }
+            fmt.Fprint(w, string(dat))
+        } else {
+            dat, err := json.Marshal(collector)
+            if err != nil {
+                log.Println(err)
+                return
+            }
+            fmt.Fprint(w, string(dat))
+        }
+
     case "DEL":
         fmt.Fprintf(w, "Implementing yet...")
     }
