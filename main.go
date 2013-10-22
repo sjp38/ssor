@@ -32,7 +32,7 @@ func insertCollector(collector Collector, c appengine.Context) bool {
     return true
 }
 
-func getCollector(id int, c appengine.Context) (*Collector, bool) {
+func getCollectorFromData(id int, c appengine.Context) (*Collector, bool) {
     encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
     collector := &Collector{}
 
@@ -69,6 +69,29 @@ func updateCollector(w http.ResponseWriter, r *http.Request) {
     createCollector(w, r);
 }
 
+func getCollector(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
+    collector, succeed := getCollectorFromData(id, c)
+    if false == succeed {
+        var resp Result
+        resp.Success = "fail"
+        dat, err := json.Marshal(resp)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        fmt.Fprint(w, string(dat))
+    } else {
+        dat, err := json.Marshal(collector)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        fmt.Fprint(w, string(dat))
+    }
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -76,27 +99,7 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
     case "PUT":
         updateCollector(w, r)
     case "GET":
-        c := appengine.NewContext(r)
-        id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
-        collector, succeed := getCollector(id, c)
-        if false == succeed {
-            var resp Result
-            resp.Success = "fail"
-            dat, err := json.Marshal(resp)
-            if err != nil {
-                log.Println(err)
-                return
-            }
-            fmt.Fprint(w, string(dat))
-        } else {
-            dat, err := json.Marshal(collector)
-            if err != nil {
-                log.Println(err)
-                return
-            }
-            fmt.Fprint(w, string(dat))
-        }
-
+        getCollector(w, r)
     case "DEL":
         fmt.Fprintf(w, "Implementing yet...")
     }
