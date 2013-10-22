@@ -65,11 +65,16 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, string(dat))
 }
 
+func updateCollector(w http.ResponseWriter, r *http.Request) {
+    createCollector(w, r);
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
         createCollector(w, r)
     case "PUT":
+        updateCollector(w, r)
     case "GET":
         c := appengine.NewContext(r)
         id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
