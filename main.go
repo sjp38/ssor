@@ -20,13 +20,14 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
     body, _ := ioutil.ReadAll(r.Body)
-    if "POST" == r.Method {
-        var collector Collector
-        json.Unmarshal(body, &collector)
-        fmt.Fprintf(w, "parsed nick: %s\n", collector.Nickname)
+    var collector Collector
+    switch r.Method {
+    case "POST":
+    case "PUT":
+    case "GET":
+    case "DEL":
+        fmt.Fprintf(w, "Implementing yet...")
     }
-    fmt.Fprintf(w, "Collector handler called. method: %s, body: %s\n",
-            r.Method, body)
 }
 
 func runeHandler(w http.ResponseWriter, r *http.Request) {
