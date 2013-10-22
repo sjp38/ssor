@@ -3,10 +3,6 @@ package sor
 import (
 )
 
-type Signup struct {
-    GoogleId int `json:"googleId"`
-}
-
 type Collector struct {
     GoogleId int `json:"googleId"`
     Nickname string `json:"nickname"`
