@@ -9,9 +9,9 @@ import (
 
 func init() {
     http.HandleFunc("/", welcome)
-    http.HandleFunc("/Signup", signupHandler)
-    http.HandleFunc("/Collector", collectorHandler)
-    http.HandleFunc("/Rune", runeHandler)
+    http.HandleFunc("/signup", signupHandler)
+    http.HandleFunc("/collector", collectorHandler)
+    http.HandleFunc("/rune", runeHandler)
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
