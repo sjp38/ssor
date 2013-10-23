@@ -108,7 +108,16 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     id := r.URL.Query()["googleId"][0]
     encKey := datastore.NewKey(c, "collector", id, 0, nil)
     err := datastore.Delete(c, encKey)
-    responseSuccess(w, err == nil)
+
+    var res CollectorWriteResult
+    res.Success = strSuccess(err == nil)
+    res.GoogleId = id
+    dat, err := json.Marshal(res)
+    if err != nil {
+        log.Println(err)
+        return
+    }
+    fmt.Fprint(w, string(dat))
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
