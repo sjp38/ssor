@@ -91,8 +91,6 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
 func delCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
-    log.Println("WRYYY")
-    log.Println("will delete collector with id %s", id)
     encKey := datastore.NewKey(c, "collector", id, 0, nil)
     err := datastore.Delete(c, encKey)
     responseSuccess(w, err == nil)
