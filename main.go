@@ -64,8 +64,20 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     body, _ := ioutil.ReadAll(r.Body)
     var collector Collector
     json.Unmarshal(body, &collector)
-    result := insertCollector(collector, c)
-    responseSuccess(w, result)
+    success := insertCollector(collector, c)
+    var res CollectorPutResult
+    if success {
+        res.Success = "success"
+    } else {
+        res.Success = "fail"
+    }
+    res.GoogleId = collector.GoogleId
+    dat, err := json.Marshal(res)
+    if err != nil {
+        log.Println(err)
+        return
+    }
+    fmt.Fprint(w, string(dat))
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
