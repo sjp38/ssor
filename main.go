@@ -10,6 +10,11 @@ import (
     "net/http"
 )
 
+type result struct {
+    success bool
+    reason string
+}
+
 func init() {
     http.HandleFunc("/", welcome)
     http.HandleFunc("/collector", collectorHandler)
@@ -53,12 +58,22 @@ func respInJson(w http.ResponseWriter, data interface{}) {
     fmt.Fprint(w, string(dat))
 }
 
-func strSuccess(success bool) string {
-    if success {
-        return "success"
-    } else {
-        return "fail"
+func respFail(w http.ResponseWriter, reason string) {
+    var res FailResult
+    res.Success = "fail"
+    res.Reason = reason
+    respInJson(w, res)
+}
+
+func respCollector(w http.ResponseWriter, r result, collector *Collector) {
+    if r.success == false {
+        respFail(w, r.reason)
+        return
     }
+    var res CollectorResult
+    res.Success = "success"
+    res.Collector = *collector
+    respInJson(w, res)
 }
 
 func createCollector(w http.ResponseWriter, r *http.Request) {
@@ -69,10 +84,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     json.Unmarshal(body, &collector)
     success := insertCollector(collector, c)
 
-    var res CollectorWriteResult
-    res.Success = strSuccess(success)
-    res.GoogleId = collector.GoogleId
-    respInJson(w, res)
+    respCollector(w, result{success, "Unknown"}, &collector)
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
@@ -83,24 +95,24 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
-    collector.GoogleId = id
 
-    var resp CollectorReadResult
-    resp.Success = strSuccess(succeed)
-    resp.Collector = *collector
-    respInJson(w, resp)
+    respCollector(w, result{succeed, "Unknown"}, collector)
 }
 
 func delCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
     encKey := datastore.NewKey(c, "collector", id, 0, nil)
-    err := datastore.Delete(c, encKey)
+    collector, exist := getCollectorFromData(id, c)
+    var res result
+    if exist {
+        err := datastore.Delete(c, encKey)
+        res = result{err == nil, "datastore error"}
+    } else {
+        res = result{false, "not exist"}
+    }
 
-    var res CollectorWriteResult
-    res.Success = strSuccess(err == nil)
-    res.GoogleId = id
-    respInJson(w, res)
+    respCollector(w, res, collector)
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
