@@ -92,6 +92,37 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func delCollector(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    id, err := strconv.Atoi(r.URL.Query()["googleId"][0])
+    log.Println("WRYYY")
+    log.Println("will delete collector with id %s", id)
+    if err != nil {
+        log.Println(err)
+        return
+    }
+    encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
+    err = datastore.Delete(c, encKey)
+    var resp Result
+    if err != nil {
+        resp.Success = "fail"
+        dat, err := json.Marshal(resp)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        fmt.Fprint(w, string(dat))
+    } else {
+        resp.Success = "success"
+        dat, err := json.Marshal(resp)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        fmt.Fprint(w, string(dat))
+    }
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -100,8 +131,8 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
         updateCollector(w, r)
     case "GET":
         getCollector(w, r)
-    case "DEL":
-        fmt.Fprintf(w, "Implementing yet...")
+    case "DELETE":
+        delCollector(w, r)
     }
 }
 
