@@ -43,13 +43,18 @@ func getCollectorFromData(id string, c appengine.Context) (*Collector, bool) {
     return collector, true
 }
 
+func strSuccess(success bool) string {
+    if success {
+        return "success"
+    } else {
+        return "fail"
+    }
+}
+
 func responseSuccess(w http.ResponseWriter, success bool) {
     var res Result
-    if success {
-        res.Success = "success"
-    } else {
-        res.Success = "fail"
-    }
+    res.Success = strSuccess(success)
+
     dat, err := json.Marshal(res)
     if err != nil {
         log.Println(err)
@@ -65,12 +70,9 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     var collector Collector
     json.Unmarshal(body, &collector)
     success := insertCollector(collector, c)
+
     var res CollectorPutResult
-    if success {
-        res.Success = "success"
-    } else {
-        res.Success = "fail"
-    }
+    res.Success = strSuccess(success)
     res.GoogleId = collector.GoogleId
     dat, err := json.Marshal(res)
     if err != nil {
