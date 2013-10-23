@@ -90,6 +90,7 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
+    collector.GoogleId = id
 
     var resp CollectorGetResult
     resp.Success = strSuccess(succeed)
