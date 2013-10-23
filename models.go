@@ -23,6 +23,11 @@ type CollectorPutResult struct {
     GoogleId string `json:"googleId"`
 }
 
+type CollectorGetResult struct {
+    Success string `json:"result"`
+    Collector Collector `json:"collector"`
+}
+
 type Result struct {
     Success string `json:"result"`
 }

@@ -90,16 +90,16 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
-    if false == succeed {
-        responseSuccess(w, succeed)
-    } else {
-        dat, err := json.Marshal(collector)
-        if err != nil {
-            log.Println(err)
-            return
-        }
-        fmt.Fprint(w, string(dat))
+
+    var resp CollectorGetResult
+    resp.Success = strSuccess(succeed)
+    resp.Collector = *collector
+    dat, err := json.Marshal(resp)
+    if err != nil {
+        log.Println(err)
+        return
     }
+    fmt.Fprint(w, string(dat))
 }
 
 func delCollector(w http.ResponseWriter, r *http.Request) {
