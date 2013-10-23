@@ -27,7 +27,3 @@ type CollectorReadResult struct {
     Success string `json:"result"`
     Collector Collector `json:"collector"`
 }
-
-type Result struct {
-    Success string `json:"result"`
-}
