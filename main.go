@@ -43,6 +43,16 @@ func getCollectorFromData(id string, c appengine.Context) (*Collector, bool) {
     return collector, true
 }
 
+// Response in json form
+func respInJson(w http.ResponseWriter, data interface{}) {
+    dat, err := json.Marshal(data)
+    if err != nil {
+        log.Println(err)
+        return
+    }
+    fmt.Fprint(w, string(dat))
+}
+
 func strSuccess(success bool) string {
     if success {
         return "success"
@@ -62,12 +72,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     var res CollectorWriteResult
     res.Success = strSuccess(success)
     res.GoogleId = collector.GoogleId
-    dat, err := json.Marshal(res)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    fmt.Fprint(w, string(dat))
+    respInJson(w, res)
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
@@ -83,12 +88,7 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     var resp CollectorReadResult
     resp.Success = strSuccess(succeed)
     resp.Collector = *collector
-    dat, err := json.Marshal(resp)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    fmt.Fprint(w, string(dat))
+    respInJson(w, resp)
 }
 
 func delCollector(w http.ResponseWriter, r *http.Request) {
@@ -100,12 +100,7 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     var res CollectorWriteResult
     res.Success = strSuccess(err == nil)
     res.GoogleId = id
-    dat, err := json.Marshal(res)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    fmt.Fprint(w, string(dat))
+    respInJson(w, res)
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
