@@ -44,6 +44,21 @@ func getCollectorFromData(id int, c appengine.Context) (*Collector, bool) {
     return collector, true
 }
 
+func responseSuccess(w http.ResponseWriter, success bool) {
+    var res Result
+    if success {
+        res.Success = "success"
+    } else {
+        res.Success = "fail"
+    }
+    dat, err := json.Marshal(res)
+    if err != nil {
+        log.Println(err)
+        return
+    }
+    fmt.Fprint(w, string(dat))
+}
+
 func createCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     defer r.Body.Close()
@@ -51,18 +66,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     var collector Collector
     json.Unmarshal(body, &collector)
     result := insertCollector(collector, c)
-    var resp Result
-    if result {
-        resp.Success = "success"
-    } else {
-        resp.Success = "fail"
-    }
-    dat, err := json.Marshal(resp)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    fmt.Fprint(w, string(dat))
+    responseSuccess(w, result)
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
@@ -74,14 +78,7 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
     collector, succeed := getCollectorFromData(id, c)
     if false == succeed {
-        var resp Result
-        resp.Success = "fail"
-        dat, err := json.Marshal(resp)
-        if err != nil {
-            log.Println(err)
-            return
-        }
-        fmt.Fprint(w, string(dat))
+        responseSuccess(w, succeed)
     } else {
         dat, err := json.Marshal(collector)
         if err != nil {
@@ -103,24 +100,7 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     }
     encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
     err = datastore.Delete(c, encKey)
-    var resp Result
-    if err != nil {
-        resp.Success = "fail"
-        dat, err := json.Marshal(resp)
-        if err != nil {
-            log.Println(err)
-            return
-        }
-        fmt.Fprint(w, string(dat))
-    } else {
-        resp.Success = "success"
-        dat, err := json.Marshal(resp)
-        if err != nil {
-            log.Println(err)
-            return
-        }
-        fmt.Fprint(w, string(dat))
-    }
+    responseSuccess(w, err == nil)
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
