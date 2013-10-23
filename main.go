@@ -51,18 +51,6 @@ func strSuccess(success bool) string {
     }
 }
 
-func responseSuccess(w http.ResponseWriter, success bool) {
-    var res Result
-    res.Success = strSuccess(success)
-
-    dat, err := json.Marshal(res)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    fmt.Fprint(w, string(dat))
-}
-
 func createCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     defer r.Body.Close()
