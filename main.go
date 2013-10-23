@@ -8,7 +8,6 @@ import (
     "io/ioutil"
     "log"
     "net/http"
-    "strconv"
 )
 
 func init() {
@@ -23,7 +22,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 
 func insertCollector(collector Collector, c appengine.Context) bool {
     encKey := datastore.NewKey(c, "collector",
-            "", int64(collector.GoogleId), nil)
+            collector.GoogleId, 0, nil)
     _, err := datastore.Put(c, encKey, &collector)
     if nil != err {
         log.Println(err)
@@ -32,8 +31,8 @@ func insertCollector(collector Collector, c appengine.Context) bool {
     return true
 }
 
-func getCollectorFromData(id int, c appengine.Context) (*Collector, bool) {
-    encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
+func getCollectorFromData(id string, c appengine.Context) (*Collector, bool) {
+    encKey := datastore.NewKey(c, "collector", id, 0, nil)
     collector := &Collector{}
 
     err := datastore.Get(c, encKey, collector)
@@ -75,7 +74,7 @@ func updateCollector(w http.ResponseWriter, r *http.Request) {
 
 func getCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
-    id, _ := strconv.Atoi(r.URL.Query()["googleId"][0])
+    id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
     if false == succeed {
         responseSuccess(w, succeed)
@@ -91,15 +90,11 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
 
 func delCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
-    id, err := strconv.Atoi(r.URL.Query()["googleId"][0])
+    id := r.URL.Query()["googleId"][0]
     log.Println("WRYYY")
     log.Println("will delete collector with id %s", id)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    encKey := datastore.NewKey(c, "collector", "", int64(id), nil)
-    err = datastore.Delete(c, encKey)
+    encKey := datastore.NewKey(c, "collector", id, 0, nil)
+    err := datastore.Delete(c, encKey)
     responseSuccess(w, err == nil)
 }
 
