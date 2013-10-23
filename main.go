@@ -71,7 +71,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     json.Unmarshal(body, &collector)
     success := insertCollector(collector, c)
 
-    var res CollectorPutResult
+    var res CollectorWriteResult
     res.Success = strSuccess(success)
     res.GoogleId = collector.GoogleId
     dat, err := json.Marshal(res)
@@ -92,7 +92,7 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     collector, succeed := getCollectorFromData(id, c)
     collector.GoogleId = id
 
-    var resp CollectorGetResult
+    var resp CollectorReadResult
     resp.Success = strSuccess(succeed)
     resp.Collector = *collector
     dat, err := json.Marshal(resp)

@@ -18,12 +18,12 @@ type Collector struct {
     CollectorClass string `json:"collectorClass"`
 }
 
-type CollectorPutResult struct {
+type CollectorWriteResult struct {
     Success string `json:"result"`
     GoogleId string `json:"googleId"`
 }
 
-type CollectorGetResult struct {
+type CollectorReadResult struct {
     Success string `json:"result"`
     Collector Collector `json:"collector"`
 }
