@@ -11,7 +11,7 @@ type Collector struct {
     Atk int `json:"atk"`
     Def int `json:"def"`
     Int int `json:"int"`
-    HunterClass string `json:"hunterClass"`
+    CollectorClass string `json:"collectorClass"`
 }
 
 type Result struct {
