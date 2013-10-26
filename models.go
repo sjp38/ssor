@@ -8,7 +8,9 @@ type Collector struct {
     Email string `json:"email"`
     ProfileUrl string `json:"profileUrl"`
     Nickname string `json:"nickname"`
+    MaxHp int `json:"maxHp"`
     Hp int `json:"hp"`
+    MaxMp int `json:"maxMp"`
     Mp int `json:"mp"`
     Atk int `json:"atk"`
     Def int `json:"def"`
