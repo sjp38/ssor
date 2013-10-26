@@ -3,6 +3,7 @@ package sor
 import (
     "appengine"
     "appengine/datastore"
+    "appengine/urlfetch"
     "encoding/json"
     "fmt"
     "io/ioutil"
@@ -115,6 +116,30 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     respCollector(w, res, collector)
 }
 
+func registerRune(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    isbn := r.URL.Query()["ISBN"][0]
+
+    searchUrl := "http://apis.daum.net/search/book"
+    searchUrl += "?output=json&apikey=" + daumApiKey
+    searchUrl += "&q=" + isbn
+
+    client := urlfetch.Client(c)
+    resp, err := client.Get(searchUrl)
+    if err != nil {
+        log.Print(err)
+        return
+    }
+    defer resp.Body.Close()
+
+    json, err := ioutil.ReadAll(resp.Body)
+    fmt.Fprint(w, string(json))
+}
+
+func getRune(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "GET not implemented yet...")
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -129,8 +154,14 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func runeHandler(w http.ResponseWriter, r *http.Request) {
-    defer r.Body.Close()
-    body, _ := ioutil.ReadAll(r.Body)
-    fmt.Fprintf(w, "Rune handler called. method: %s, body: %s",
-            r.Method, body)
+    switch r.Method {
+    case "POST":
+        fmt.Fprint(w, "POST is not supported")
+    case "PUT":
+        registerRune(w, r)
+    case "GET":
+        getRune(w, r)
+    case "DELETE":
+        fmt.Fprintf(w, "DELETE is not supported")
+    }
 }
