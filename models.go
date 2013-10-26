@@ -20,7 +20,7 @@ type Collector struct {
 
 type CollectorResult struct {
     Success string `json:"result"`
-    Collector Collector `json:"googleId"`
+    Collector Collector `json:"collector"`
 }
 
 type FailResult struct {
