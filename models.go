@@ -60,6 +60,12 @@ type FightResult struct {
     Rune Rune `json:"rune"`
 }
 
+type HealRequest struct {
+    Target string `json:"target"`
+    Type string `json:"type"`
+    Id string `json:"id"`
+}
+
 type FailResult struct {
     Success string `json:"result"`
     Reason string `json:"reason"`

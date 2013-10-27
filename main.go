@@ -18,12 +18,19 @@ type result struct {
     reason string
 }
 
+const (
+    HEAL_COLLECTOR_UNIT = 10
+    HEAL_RUNE_UNIT = 1
+    HEAL_MP_UNIT = 5
+)
+
 func init() {
     http.HandleFunc("/", welcome)
     http.HandleFunc("/collector", collectorHandler)
     http.HandleFunc("/rune", runeHandler)
     http.HandleFunc("/runes", runesHandler)
     http.HandleFunc("/fight", fightHandler)
+    http.HandleFunc("/heal", healHandler)
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
@@ -355,6 +362,96 @@ func fight(w http.ResponseWriter, r *http.Request) {
     respInJson(w, fightResult)
 }
 
+func healCollector(healRequest HealRequest,
+        w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    collector, succeed := getCollectorFromData(healRequest.Id, c)
+    if succeed == false {
+        respFail(w, "fail to get collector from datastore")
+        return
+    }
+
+    if collector.Mp < HEAL_MP_UNIT {
+        respFail(w, "mp is not enough")
+        return
+    }
+    collector.Mp -= HEAL_MP_UNIT
+    collector.Hp += HEAL_COLLECTOR_UNIT
+    if collector.Hp > collector.MaxHp {
+        collector.Hp = collector.MaxHp
+    }
+    succeed = insertCollector(*collector, c)
+    if succeed == false {
+        respFail(w, "fail to update healed collector")
+        return
+    }
+    var collectorResult CollectorResult
+    collectorResult.Success = "success"
+    collectorResult.Collector = *collector
+    respInJson(w, collectorResult)
+}
+
+func healRune(request HealRequest,
+        w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    rune, succeed := getRuneFromData(request.Id, c)
+    if succeed == false {
+        respFail(w, "fail to get rune from datastore")
+        return
+    }
+    collector, succeed := getCollectorFromData(rune.OwnerGoogleId, c)
+    if succeed == false {
+        respFail(w, "fail to get collector from datastore")
+        return
+    }
+
+    if request.Type == "mp" {
+        if collector.Mp < HEAL_MP_UNIT {
+            respFail(w, "mp is not enough")
+            return
+        }
+        collector.Mp -= HEAL_MP_UNIT
+    } else {
+        if collector.ScanCount < 1 {
+            respFail(w, "scan count is not enough")
+            return
+        }
+        collector.ScanCount--
+    }
+    rune.Hp += HEAL_RUNE_UNIT
+    if rune.Hp > rune.MaxHp {
+        rune.Hp = rune.MaxHp
+    }
+    succeed = insertCollector(*collector, c)
+    if succeed == false {
+        respFail(w, "fail to update consumed collector")
+        return
+    }
+    succeed = insertRune(*rune, c)
+    if succeed == false {
+        respFail(w, "fail to update healed rune")
+        return
+    }
+    var runeResult RuneResult
+    runeResult.Success = "success"
+    runeResult.Rune = *rune
+    respInJson(w, runeResult)
+}
+
+func heal(w http.ResponseWriter, r *http.Request) {
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    var healRequest HealRequest
+    json.Unmarshal(body, &healRequest)
+
+    switch healRequest.Target {
+    case "collector":
+        healCollector(healRequest, w, r)
+    case "rune":
+        healRune(healRequest, w, r)
+    }
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -394,6 +491,13 @@ func fightHandler(w http.ResponseWriter, r *http.Request) {
         fight(w, r)
     default:
         fmt.Fprint(w, "not supported")
+    }
+}
+
+func healHandler(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case "POST":
+        heal(w, r)
     default:
         fmt.Fprint(w, "not supported")
     }
