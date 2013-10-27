@@ -79,6 +79,28 @@ func respCollector(w http.ResponseWriter, r result, collector *Collector) {
     respInJson(w, res)
 }
 
+func doSetCollectorInitStat(collector *Collector, maxHp int, maxMp int,
+        atk int, def int, int int) {
+    collector.MaxHp = maxHp
+    collector.Hp = maxHp
+    collector.MaxMp = maxMp
+    collector.Mp = maxMp
+    collector.Atk = atk
+    collector.Def = def
+    collector.Int = int
+}
+
+func setCollectorInitStat(collector *Collector) {
+    switch collector.CollectorClass {
+    case "Geek":
+        doSetCollectorInitStat(collector, 100,100,10,5,10)
+    case "Nerd":
+        doSetCollectorInitStat(collector, 100,100,10,10,5)
+    case "Dork":
+        doSetCollectorInitStat(collector, 100,100,5,10,10)
+    }
+}
+
 func createCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     defer r.Body.Close()
@@ -92,14 +114,8 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     collector.ProfileUrl = collectorMinInfo.ProfileUrl
     collector.Nickname = collectorMinInfo.Nickname
     collector.CollectorClass = collectorMinInfo.CollectorClass
-    collector.MaxHp = 100
-    collector.Hp = 100
-    collector.MaxMp = 100
-    collector.Mp = 100
-    collector.Atk = 10
-    collector.Def = 10
-    collector.Int = 10
-    collector.Exp = 10
+    setCollectorInitStat(&collector)
+    collector.Exp = 0
     collector.ScanCount = 5
 
     success := insertCollector(collector, c)
