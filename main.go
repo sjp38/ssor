@@ -261,6 +261,22 @@ func getRune(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     isbn := r.URL.Query()["ISBN"][0]
 
+    googleIdExist := len(r.URL.Query()["googleId"]) > 0
+    if googleIdExist {
+        googleId := r.URL.Query()["googleId"][0]
+        collector, succeed := getCollectorFromData(googleId, c)
+        if collector.ScanCount <= 0 {
+            respFail(w, "scan count is not enough")
+            return
+        }
+        collector.ScanCount--
+        succeed = insertCollector(*collector, c)
+        if succeed == false {
+            respFail(w, "fail to update collector")
+            return
+        }
+    }
+
     rune, succeed := getRuneFromData(isbn, c)
     if succeed == false {
         log.Println("fail to get rune from datastore. make it!")
