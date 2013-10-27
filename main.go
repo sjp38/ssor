@@ -251,7 +251,6 @@ func runeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func runesHandler(w http.ResponseWriter, r *http.Request) {
-    w.Fprint(w, "not implemented yet")
     switch r.Method {
     case "POST":
     case "PUT":
@@ -262,7 +261,7 @@ func runesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fightHandler(w http.ResponseWriter, r *http.Request) {
-    w.Fprint(w, "not implemented yet")
+    fmt.Fprint(w, "not implemented yet")
     switch r.Method {
     case "POST":
     case "PUT":
