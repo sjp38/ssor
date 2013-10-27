@@ -302,6 +302,7 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
         }
     } else {
         attacker.Hp += damage
+        rune.Hp -= 1
         if attacker.Hp < 0 {
             attacker.Hp = 0
         }
