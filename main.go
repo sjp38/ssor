@@ -282,6 +282,7 @@ func getRunes(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         log.Println(err)
         respFail(w, "fail to get rune from datastore")
+        return
     }
 
     var runesResult RunesResult
