@@ -158,10 +158,18 @@ func getRuneFromData(isbn string, c appengine.Context) (*Rune, bool) {
     return rune, true
 }
 
-func registerRune(w http.ResponseWriter, r *http.Request) {
+func registerRune(w http.ResponseWriter, r *http.Request, rune Rune) bool {
     c := appengine.NewContext(r)
-    isbn := r.URL.Query()["ISBN"][0]
 
+    success := insertRune(rune, c)
+    if success == false {
+        return false
+    }
+    return true
+}
+
+func makeRune(c appengine.Context, isbn string) (Rune, bool) {
+    var rune Rune
     searchUrl := "http://apis.daum.net/search/book"
     searchUrl += "?output=json&apikey=" + daumApiKey
     searchUrl += "&q=" + isbn
@@ -170,42 +178,45 @@ func registerRune(w http.ResponseWriter, r *http.Request) {
     resp, err := client.Get(searchUrl)
     if err != nil {
         log.Print(err)
-        return
+        return rune, false
     }
     defer resp.Body.Close()
 
     body, err := ioutil.ReadAll(resp.Body)
     var searchResult DaumBookSearchResult
     json.Unmarshal(body, &searchResult)
+    if len(searchResult.Channel.Item) <= 0 {
+        return rune, false
+    }
     itemInfo := searchResult.Channel.Item[0]
 
-    var rune Rune
     rune.ISBN = isbn
     rune.ImageUrl = itemInfo.Cover_l_url
     rune.Title = itemInfo.Title
     rune.Type = "Basic"
     rune.MaxHp = 10
-    rune.Hp = 5
-
-    success := insertRune(rune, c)
-    if success == false {
-        respFail(w, "datastore insert fail")
-        return
-    }
-    var runeResult RuneResult
-    runeResult.Success = "success"
-    runeResult.Rune = rune
-    respInJson(w, runeResult)
+    rune.Hp = 10
+    rune.OwnerGoogleId = ""
+    return rune, true
 }
 
+// Get rune info
+// If not exist in datastore yet, register new rune to datastore
 func getRune(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     isbn := r.URL.Query()["ISBN"][0]
 
     rune, succeed := getRuneFromData(isbn, c)
     if succeed == false {
-        respFail(w, "datastore failure")
-        return
+        log.Println("fail to get rune from datastore. make it!")
+        newRune, succeed := makeRune(c, isbn)
+        if succeed == false {
+            respFail(w, "fail to make rune")
+            return
+        }
+        log.Println("made rune. register it!!")
+        registerRune(w, r, newRune)
+        *rune = newRune
     }
     var runeResult RuneResult
     runeResult.Success = "success"
@@ -231,7 +242,7 @@ func runeHandler(w http.ResponseWriter, r *http.Request) {
     case "POST":
         fmt.Fprint(w, "POST is not supported")
     case "PUT":
-        registerRune(w, r)
+        //registerRune(w, r)
     case "GET":
         getRune(w, r)
     case "DELETE":
