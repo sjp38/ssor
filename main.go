@@ -116,6 +116,17 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     respCollector(w, res, collector)
 }
 
+func insertRune(rune Rune, c appengine.Context) bool {
+    encKey := datastore.NewKey(c, "rune",
+            rune.ISBN, 0, nil)
+    _, err := datastore.Put(c, encKey, &rune)
+    if nil != err {
+        log.Println(err)
+        return false
+    }
+    return true
+}
+
 func registerRune(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     isbn := r.URL.Query()["ISBN"][0]
@@ -132,8 +143,28 @@ func registerRune(w http.ResponseWriter, r *http.Request) {
     }
     defer resp.Body.Close()
 
-    json, err := ioutil.ReadAll(resp.Body)
-    fmt.Fprint(w, string(json))
+    body, err := ioutil.ReadAll(resp.Body)
+    var searchResult DaumBookSearchResult
+    json.Unmarshal(body, &searchResult)
+    itemInfo := searchResult.Channel.Item[0]
+
+    var rune Rune
+    rune.ISBN = isbn
+    rune.ImageUrl = itemInfo.Cover_l_url
+    rune.Title = itemInfo.Title
+    rune.Type = "Basic"
+    rune.MaxHp = 10
+    rune.Hp = 5
+
+    success := insertRune(rune, c)
+    if success == false {
+        respFail(w, "datastore insert fail")
+        return
+    }
+    var runeResult RuneResult
+    runeResult.Success = "success"
+    runeResult.Rune = rune
+    respInJson(w, runeResult)
 }
 
 func getRune(w http.ResponseWriter, r *http.Request) {
