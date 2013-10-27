@@ -8,7 +8,9 @@ import (
     "fmt"
     "io/ioutil"
     "log"
+    "math/rand"
     "net/http"
+    "time"
 )
 
 type result struct {
@@ -280,6 +282,63 @@ func getRunes(w http.ResponseWriter, r *http.Request) {
     respInJson(w, runes)
 }
 
+func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
+    rand.Seed(time.Now().UTC().UnixNano())
+    attackPoint := attacker.Atk
+    attackPoint += rand.Intn(int(float32(attackPoint) * 0.1) + 1)
+    defencePoint := defender.Def
+    defencePoint += rand.Intn(int(float32(defencePoint) * 0.1) + 1)
+
+    damage := attackPoint - defencePoint
+    if damage > 0 {
+        rune.Hp -= damage
+    } else {
+        attacker.Hp += damage
+    }
+}
+
+func fight(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    attackerId := r.URL.Query()["attacker"][0]
+    defenderId := r.URL.Query()["defender"][0]
+    isbn := r.URL.Query()["ISBN"][0]
+
+    attacker, succeed := getCollectorFromData(attackerId, c)
+    if succeed == false {
+        respFail(w, "fail to get attacker")
+        return
+    }
+    defender, succeed := getCollectorFromData(defenderId, c)
+    if succeed == false {
+        respFail(w, "fail to get defender")
+        return
+    }
+    rune, succeed := getRuneFromData(isbn, c)
+    if succeed == false {
+        respFail(w, "fail to get rune")
+        return
+    }
+    do_fight(attacker, defender, rune)
+
+    succeed = insertCollector(*attacker, c)
+    if succeed == false {
+        respFail(w, "fail to update attacker")
+        return
+    }
+    succeed = insertRune(*rune, c)
+    if succeed == false {
+        respFail(w, "fail to update rune")
+        return
+    }
+
+    var fightResult FightResult
+    fightResult.Success = "success"
+    fightResult.Attacker = *attacker
+    fightResult.Defender = *defender
+    fightResult.Rune = *rune
+    respInJson(w, fightResult)
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -324,9 +383,14 @@ func fightHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "not implemented yet")
     switch r.Method {
     case "POST":
+        fmt.Fprint(w, "not supported")
     case "PUT":
+        fmt.Fprint(w, "not supported")
     case "GET":
+        fight(w, r)
     case "DELETE":
+        fmt.Fprint(w, "not supported")
     default:
+        fmt.Fprint(w, "not supported")
     }
 }
