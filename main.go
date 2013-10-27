@@ -20,6 +20,8 @@ func init() {
     http.HandleFunc("/", welcome)
     http.HandleFunc("/collector", collectorHandler)
     http.HandleFunc("/rune", runeHandler)
+    http.HandleFunc("/runes", runesHandler)
+    http.HandleFunc("/fight", fightHandler)
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
@@ -217,5 +219,27 @@ func runeHandler(w http.ResponseWriter, r *http.Request) {
         getRune(w, r)
     case "DELETE":
         fmt.Fprintf(w, "DELETE is not supported")
+    }
+}
+
+func runesHandler(w http.ResponseWriter, r *http.Request) {
+    w.Fprint(w, "not implemented yet")
+    switch r.Method {
+    case "POST":
+    case "PUT":
+    case "GET":
+    case "DELETE":
+    default:
+    }
+}
+
+func fightHandler(w http.ResponseWriter, r *http.Request) {
+    w.Fprint(w, "not implemented yet")
+    switch r.Method {
+    case "POST":
+    case "PUT":
+    case "GET":
+    case "DELETE":
+    default:
     }
 }
