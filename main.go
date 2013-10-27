@@ -249,6 +249,21 @@ func getRune(w http.ResponseWriter, r *http.Request) {
     respInJson(w, runeResult)
 }
 
+func getRunes(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    googleId := r.URL.Query()["googleId"][0]
+
+    q := datastore.NewQuery("rune").Filter("OwnerGoogleId = ", googleId)
+    var runes []Rune
+    _, err := q.GetAll(c, &runes)
+    if err != nil {
+        log.Println(err)
+        respFail(w, "fail to get rune from datastore")
+    }
+
+    respInJson(w, runes)
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -278,9 +293,13 @@ func runeHandler(w http.ResponseWriter, r *http.Request) {
 func runesHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
+        fmt.Fprint(w, "not supported")
     case "PUT":
+        fmt.Fprint(w, "not supported")
     case "GET":
+        getRunes(w, r)
     case "DELETE":
+        fmt.Fprint(w, "not supported")
     default:
     }
 }
