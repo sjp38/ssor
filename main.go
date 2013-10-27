@@ -127,6 +127,18 @@ func insertRune(rune Rune, c appengine.Context) bool {
     return true
 }
 
+func getRuneFromData(isbn string, c appengine.Context) (*Rune, bool) {
+    encKey := datastore.NewKey(c, "rune", isbn, 0, nil)
+    rune := &Rune{}
+
+    err := datastore.Get(c, encKey, rune)
+    if err != nil {
+        log.Println(err)
+        return rune, false
+    }
+    return rune, true
+}
+
 func registerRune(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     isbn := r.URL.Query()["ISBN"][0]
@@ -168,7 +180,18 @@ func registerRune(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRune(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "GET not implemented yet...")
+    c := appengine.NewContext(r)
+    isbn := r.URL.Query()["ISBN"][0]
+
+    rune, succeed := getRuneFromData(isbn, c)
+    if succeed == false {
+        respFail(w, "datastore failure")
+        return
+    }
+    var runeResult RuneResult
+    runeResult.Success = "success"
+    runeResult.Rune = *rune
+    respInJson(w, runeResult)
 }
 
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
