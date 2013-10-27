@@ -327,8 +327,10 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
         if rune.Hp < 0 {
             rune.Hp = 0
         }
+        attacker.Exp += damage
     } else {
         attacker.Hp += damage
+        attacker.Exp++
         rune.Hp -= 1
         if attacker.Hp < 0 {
             attacker.Hp = 0
@@ -393,6 +395,7 @@ func healCollector(healRequest HealRequest,
     }
     collector.Mp -= HEAL_MP_UNIT
     collector.Hp += HEAL_COLLECTOR_UNIT
+    collector.Exp += HEAL_COLLECTOR_UNIT
     if collector.Hp > collector.MaxHp {
         collector.Hp = collector.MaxHp
     }
@@ -435,6 +438,7 @@ func healRune(request HealRequest,
         collector.ScanCount--
     }
     rune.Hp += HEAL_RUNE_UNIT
+    collector.Exp += HEAL_RUNE_UNIT
     if rune.Hp > rune.MaxHp {
         rune.Hp = rune.MaxHp
     }
