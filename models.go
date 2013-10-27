@@ -48,6 +48,11 @@ type RuneResult struct {
     Rune Rune `json:"rune"`
 }
 
+type RunesResult struct {
+    Success string `json:"results"`
+    Runes []Rune `json:"runes"`
+}
+
 type FightResult struct {
     Success string `json:"result"`
     Attacker Collector `json:"attacker"`

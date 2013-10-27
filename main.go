@@ -284,7 +284,10 @@ func getRunes(w http.ResponseWriter, r *http.Request) {
         respFail(w, "fail to get rune from datastore")
     }
 
-    respInJson(w, runes)
+    var runesResult RunesResult
+    runesResult.Success = "success"
+    runesResult.Runes = runes
+    respInJson(w, runesResult)
 }
 
 func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
