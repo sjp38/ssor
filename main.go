@@ -366,40 +366,29 @@ func collectorHandler(w http.ResponseWriter, r *http.Request) {
 
 func runeHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
-    case "POST":
-        fmt.Fprint(w, "POST is not supported")
     case "PUT":
         setRuneOwner(w, r)
     case "GET":
         getRune(w, r)
-    case "DELETE":
-        fmt.Fprintf(w, "DELETE is not supported")
+    default:
+        fmt.Fprintf(w, "not supported")
     }
 }
 
 func runesHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
-    case "POST":
-        fmt.Fprint(w, "not supported")
-    case "PUT":
-        fmt.Fprint(w, "not supported")
     case "GET":
         getRunes(w, r)
-    case "DELETE":
-        fmt.Fprint(w, "not supported")
     default:
+        fmt.Fprint(w, "not supported")
     }
 }
 
 func fightHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
-    case "POST":
-        fmt.Fprint(w, "not supported")
-    case "PUT":
-        fmt.Fprint(w, "not supported")
     case "GET":
         fight(w, r)
-    case "DELETE":
+    default:
         fmt.Fprint(w, "not supported")
     default:
         fmt.Fprint(w, "not supported")
