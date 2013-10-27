@@ -381,7 +381,7 @@ func fight(w http.ResponseWriter, r *http.Request) {
 func healCollector(healRequest HealRequest,
         w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
-    collector, succeed := getCollectorFromData(healRequest.Id, c)
+    collector, succeed := getCollectorFromData(healRequest.GoogleId, c)
     if succeed == false {
         respFail(w, "fail to get collector from datastore")
         return
@@ -410,7 +410,7 @@ func healCollector(healRequest HealRequest,
 func healRune(request HealRequest,
         w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
-    rune, succeed := getRuneFromData(request.Id, c)
+    rune, succeed := getRuneFromData(request.ISBN, c)
     if succeed == false {
         respFail(w, "fail to get rune from datastore")
         return

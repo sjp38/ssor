@@ -63,7 +63,8 @@ type FightResult struct {
 type HealRequest struct {
     Target string `json:"target"`
     Type string `json:"type"`
-    Id string `json:"id"`
+    GoogleId string `json:"googleId"`
+    ISBN string `json:"ISBN"`
 }
 
 type FailResult struct {
