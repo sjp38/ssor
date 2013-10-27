@@ -297,8 +297,14 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
     damage := attackPoint - defencePoint
     if damage > 0 {
         rune.Hp -= damage
+        if rune.Hp < 0 {
+            rune.Hp = 0
+        }
     } else {
         attacker.Hp += damage
+        if attacker.Hp < 0 {
+            attacker.Hp = 0
+        }
     }
 }
 
