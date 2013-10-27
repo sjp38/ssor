@@ -29,14 +29,18 @@ type CollectorResult struct {
     Collector Collector `json:"collector"`
 }
 
-type Rune struct {
+type RuneMinInfo struct {
     ISBN string `json:"ISBN"`
+    OwnerGoogleId string `json:"ownerGoogleId"`
+}
+
+type Rune struct {
+    RuneMinInfo
     ImageUrl string `json:"imageUrl"`
     Title string `json:"title"`
     Type string `json:"type"`
     MaxHp int `json:"maxHp"`
     Hp int `json:"hp"`
-    OwnerGoogleId string `json:"ownerGoogleId"`
 }
 
 type RuneResult struct {

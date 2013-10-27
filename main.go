@@ -158,6 +158,31 @@ func getRuneFromData(isbn string, c appengine.Context) (*Rune, bool) {
     return rune, true
 }
 
+func setRuneOwner(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    var runeMinInfo RuneMinInfo
+    json.Unmarshal(body, &runeMinInfo)
+
+    rune, succeed := getRuneFromData(runeMinInfo.ISBN, c)
+    if succeed == false {
+        respFail(w, "fail to get rune from datastore")
+        return
+    }
+    rune.OwnerGoogleId = runeMinInfo.OwnerGoogleId
+    succeed = insertRune(*rune, c)
+    if succeed == false {
+        respFail(w, "fail to updated info to datastore")
+        return
+    }
+
+    var runeResult RuneResult
+    runeResult.Success = "success"
+    runeResult.Rune = *rune
+    respInJson(w, runeResult)
+}
+
 func registerRune(w http.ResponseWriter, r *http.Request, rune Rune) bool {
     c := appengine.NewContext(r)
 
@@ -242,7 +267,7 @@ func runeHandler(w http.ResponseWriter, r *http.Request) {
     case "POST":
         fmt.Fprint(w, "POST is not supported")
     case "PUT":
-        //registerRune(w, r)
+        setRuneOwner(w, r)
     case "GET":
         getRune(w, r)
     case "DELETE":
