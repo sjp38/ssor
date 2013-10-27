@@ -385,7 +385,6 @@ func runesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fightHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "not implemented yet")
     switch r.Method {
     case "POST":
         fmt.Fprint(w, "not supported")
