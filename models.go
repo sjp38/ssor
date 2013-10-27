@@ -3,11 +3,16 @@ package sor
 import (
 )
 
-type Collector struct {
+type CollectorMinInfo struct {
     GoogleId string `json:"googleId"`
     Email string `json:"email"`
     ProfileUrl string `json:"profileUrl"`
     Nickname string `json:"nickname"`
+    CollectorClass string `json:"collectorClass"`
+}
+
+type Collector struct {
+    CollectorMinInfo
     MaxHp int `json:"maxHp"`
     Hp int `json:"hp"`
     MaxMp int `json:"maxMp"`
@@ -17,7 +22,6 @@ type Collector struct {
     Int int `json:"int"`
     Exp int `json:"exp"`
     ScanCount int `json:"scanCount"`
-    CollectorClass string `json:"collectorClass"`
 }
 
 type CollectorResult struct {

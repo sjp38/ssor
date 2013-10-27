@@ -83,8 +83,25 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     defer r.Body.Close()
     body, _ := ioutil.ReadAll(r.Body)
+    var collectorMinInfo CollectorMinInfo
+    json.Unmarshal(body, &collectorMinInfo)
+
     var collector Collector
-    json.Unmarshal(body, &collector)
+    collector.GoogleId = collectorMinInfo.GoogleId
+    collector.Email = collectorMinInfo.Email
+    collector.ProfileUrl = collectorMinInfo.ProfileUrl
+    collector.Nickname = collectorMinInfo.Nickname
+    collector.CollectorClass = collectorMinInfo.CollectorClass
+    collector.MaxHp = 100
+    collector.Hp = 100
+    collector.MaxMp = 100
+    collector.Mp = 100
+    collector.Atk = 10
+    collector.Def = 10
+    collector.Int = 10
+    collector.Exp = 10
+    collector.ScanCount = 5
+
     success := insertCollector(collector, c)
 
     respCollector(w, result{success, "Unknown"}, &collector)
