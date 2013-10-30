@@ -22,6 +22,8 @@ const (
     HEAL_COLLECTOR_UNIT = 10
     HEAL_RUNE_UNIT = 1
     HEAL_MP_UNIT = 5
+    PLAYSTORE_URL = "https://play.google.com/store/apps/details?id="
+    APP_DOWN_URL = PLAYSTORE_URL + APP_PACKAGE_NAME
 )
 
 func init() {
@@ -34,7 +36,9 @@ func init() {
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "<h1>Welcome to SOR</h1>")
+    fmt.Fprintf(w, "<center><h1>Welcome to SOR</h1><br>\n")
+    fmt.Fprintf(w, "<h1><a href=\"%s\">Download from Google play" +
+            "</a></h1>\n</center>", APP_DOWN_URL)
 }
 
 func insertCollector(collector Collector, c appengine.Context) bool {
