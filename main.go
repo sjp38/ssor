@@ -149,6 +149,32 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
+    if collector.LastMpConsumedTime != 0 {
+        mpHeal := (time.Now().UTC().Unix() - collector.LastMpConsumedTime) / 60
+        collector.Mp += int(mpHeal)
+        if collector.Mp > collector.MaxMp {
+            collector.Mp = collector.MaxMp
+        }
+
+        success := insertCollector(*collector, c)
+        if success == false {
+            respFail(w, "fail to update healed mp")
+            return
+        }
+    }
+    if collector.LastScannedTime != 0 {
+        scanHeal := (time.Now().UTC().Unix() - collector.LastScannedTime) / 120
+        collector.ScanCount += int(scanHeal)
+        if collector.ScanCount > 5 {
+            collector.ScanCount = 5
+        }
+
+        success := insertCollector(*collector, c)
+        if success == false {
+            respFail(w, "fail to update healed scan count")
+            return
+        }
+    }
 
     respCollector(w, result{succeed, "Unknown"}, &collector.Collector)
 }
