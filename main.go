@@ -308,7 +308,7 @@ func increaseExp(collector *Collector, exp int) {
         collector.Exp -= collector.ExpToNext
         collector.ExpToNext = collector.Level * 100 +
                 int(math.Pow(8, float64(collector.Level - 1)))
-        collector.BonusPoint += int(math.Pow(8, float64(collector.Level - 1)))
+        collector.BonusPoint += 8
     }
 }
 
