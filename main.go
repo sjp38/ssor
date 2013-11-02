@@ -76,6 +76,7 @@ func respInJson(w http.ResponseWriter, data interface{}) {
 }
 
 func respFail(w http.ResponseWriter, reason string) {
+    log.Println("failed: ", reason)
     var res FailResult
     res.Success = "fail"
     res.Reason = reason
