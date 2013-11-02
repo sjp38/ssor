@@ -25,6 +25,10 @@ type Collector struct {
     ExpToNext int `json:"expToNextLevel"`
     ScanCount int `json:"scanCount"`
     BonusPoint int `json:"bonusPoint"`
+    CreatedTime int64 `json:"createdTime"`
+    LastScannedTime int64 `json:"lastScannedTime"`
+    LastMpConsumedTime int64 `json:"lastMpConsunedTime"`
+    TotalScanCount int `json:"totalScanCount"`
 }
 
 type CollectorResult struct {
@@ -35,10 +39,6 @@ type CollectorResult struct {
 // Model for internal - for GAE datastore
 type CollectorInternal struct {
     Collector
-    CreatedTime int64
-    LastScannedTime int64
-    LastMpConsumedTime int64
-    TotalScanCount int
 }
 
 type RuneMinInfo struct {
