@@ -34,6 +34,7 @@ func init() {
     http.HandleFunc("/runes", runesHandler)
     http.HandleFunc("/fight", fightHandler)
     http.HandleFunc("/heal", healHandler)
+    http.HandleFunc("/changestat", changeStatHandler)
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
@@ -533,6 +534,39 @@ func heal(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func changeStat(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    var change ChangeStat
+    json.Unmarshal(body, &change)
+
+    collector, succeed := getCollectorFromData(change.GoogleId, c)
+    if succeed == false {
+        respFail(w, "fail to get collector with id " + change.GoogleId)
+        return
+    }
+    totalConsume := change.Atk + change.Def + change.Int
+    if collector.BonusPoint < totalConsume {
+        respFail(w, "bonus point is not sufficient")
+        return
+    }
+    collector.BonusPoint -= totalConsume
+    collector.Atk += change.Atk
+    collector.Def += change.Def
+    collector.Int += change.Int
+    succeed = insertCollector(*collector, c)
+    if succeed == false {
+        respFail(w, "fail to update collector")
+        return
+    }
+
+    var res CollectorResult
+    res.Success = "success"
+    res.Collector = collector.Collector
+    respInJson(w, res)
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -579,6 +613,15 @@ func healHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
         heal(w, r)
+    default:
+        fmt.Fprint(w, "not supported")
+    }
+}
+
+func changeStatHandler(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case "POST":
+        changeStat(w, r)
     default:
         fmt.Fprint(w, "not supported")
     }

@@ -80,6 +80,13 @@ type HealRequest struct {
     ISBN string `json:"ISBN"`
 }
 
+type ChangeStat struct {
+    GoogleId string `json:"googleId"`
+    Atk int `json:"atk"`
+    Def int `json:"def"`
+    Int int `json:"int"`
+}
+
 type FailResult struct {
     Success string `json:"result"`
     Reason string `json:"reason"`
