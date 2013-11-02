@@ -304,6 +304,12 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
 func increaseExp(collector *Collector, exp int) {
     collector.Exp += exp
     if collector.Exp >= collector.ExpToNext {
+        collector.MaxHp += collector.Level * (collector.Def + collector.Int)
+        collector.MaxMp += collector.Level * (collector.Atk + collector.Int)
+        collector.Hp = collector.MaxHp
+        collector.Mp = collector.MaxMp
+        collector.ScanCount = 5
+
         collector.Level++
         collector.Exp -= collector.ExpToNext
         collector.ExpToNext = collector.Level * 100 +
