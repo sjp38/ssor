@@ -13,6 +13,7 @@ type CollectorMinInfo struct {
 
 type Collector struct {
     CollectorMinInfo
+    Level int `json:"level"`
     MaxHp int `json:"maxHp"`
     Hp int `json:"hp"`
     MaxMp int `json:"maxMp"`
@@ -21,6 +22,7 @@ type Collector struct {
     Def int `json:"def"`
     Int int `json:"int"`
     Exp int `json:"exp"`
+    ExpToNext int `json:"expToNextLevel"`
     ScanCount int `json:"scanCount"`
 }
 

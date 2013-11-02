@@ -8,6 +8,7 @@ import (
     "fmt"
     "io/ioutil"
     "log"
+    "math"
     "math/rand"
     "net/http"
     "time"
@@ -133,6 +134,9 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     collector.Nickname = collectorMinInfo.Nickname
     collector.CollectorClass = collectorMinInfo.CollectorClass
     setCollectorInitStat(collector)
+    collector.Level = 1
+    collector.ExpToNext = collector.Level * 100 +
+            int(math.Pow(8, float64(collector.Level - 1)))
     collector.Exp = 0
     collector.ScanCount = 5
 
@@ -292,6 +296,16 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
     return rune, true
 }
 
+func increaseExp(collector *Collector, exp int) {
+    collector.Exp += exp
+    if collector.Exp >= collector.ExpToNext {
+        collector.Level++
+        collector.Exp -= collector.ExpToNext
+        collector.ExpToNext = collector.Level * 100 +
+                int(math.Pow(8, float64(collector.Level - 1)))
+    }
+}
+
 // Get rune info
 // If not exist in datastore yet, register new rune to datastore
 func getRune(w http.ResponseWriter, r *http.Request) {
@@ -309,7 +323,7 @@ func getRune(w http.ResponseWriter, r *http.Request) {
         collector.LastScannedTime = time.Now().UTC().Unix()
         collector.TotalScanCount++
         collector.ScanCount--
-        collector.Exp++
+        increaseExp(&collector.Collector, 1)
         succeed = insertCollector(*collector, c)
         if succeed == false {
             respFail(w, "fail to update collector")
@@ -367,10 +381,10 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
         if rune.Hp < 0 {
             rune.Hp = 0
         }
-        attacker.Exp += damage
+        increaseExp(attacker, damage)
     } else {
         attacker.Hp += damage
-        attacker.Exp++
+        increaseExp(attacker, 1)
         rune.Hp -= 1
         if attacker.Hp < 0 {
             attacker.Hp = 0
@@ -436,7 +450,7 @@ func healCollector(healRequest HealRequest,
     collector.Mp -= HEAL_MP_UNIT
     collector.LastMpConsumedTime = time.Now().UTC().Unix()
     collector.Hp += HEAL_COLLECTOR_UNIT
-    collector.Exp += HEAL_COLLECTOR_UNIT
+    increaseExp(&collector.Collector, HEAL_COLLECTOR_UNIT)
     if collector.Hp > collector.MaxHp {
         collector.Hp = collector.MaxHp
     }
@@ -480,7 +494,7 @@ func healRune(request HealRequest,
         collector.ScanCount--
     }
     rune.Hp += HEAL_RUNE_UNIT
-    collector.Exp += HEAL_RUNE_UNIT
+    increaseExp(&collector.Collector, HEAL_RUNE_UNIT)
     if rune.Hp > rune.MaxHp {
         rune.Hp = rune.MaxHp
     }
