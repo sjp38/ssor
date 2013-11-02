@@ -309,6 +309,7 @@ func getRune(w http.ResponseWriter, r *http.Request) {
         collector.LastScannedTime = time.Now().UTC().Unix()
         collector.TotalScanCount++
         collector.ScanCount--
+        collector.Exp++
         succeed = insertCollector(*collector, c)
         if succeed == false {
             respFail(w, "fail to update collector")
