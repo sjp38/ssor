@@ -168,6 +168,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
             int(math.Pow(8, float64(collector.Level - 1)))
     collector.Exp = 0
     collector.ScanCount = 5
+    collector.BonusPoint = 0
 
     success := insertCollector(collectorInternal, c)
 
@@ -306,6 +307,7 @@ func increaseExp(collector *Collector, exp int) {
         collector.Exp -= collector.ExpToNext
         collector.ExpToNext = collector.Level * 100 +
                 int(math.Pow(8, float64(collector.Level - 1)))
+        collector.BonusPoint += int(math.Pow(8, float64(collector.Level - 1)))
     }
 }
 

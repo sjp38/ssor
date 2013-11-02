@@ -24,6 +24,7 @@ type Collector struct {
     Exp int `json:"exp"`
     ExpToNext int `json:"expToNextLevel"`
     ScanCount int `json:"scanCount"`
+    BonusPoint int `json:"bonusPoint"`
 }
 
 type CollectorResult struct {
