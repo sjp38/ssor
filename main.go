@@ -282,6 +282,8 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
             "image" + imageUrl[len("http://book.daum-img.net/R110x160"):]
     rune.ImageUrl = imageUrl
 
+    rune.ThumbnailUrl = itemInfo.Cover_l_url
+
     rune.Title = itemInfo.Title
     rune.Type = "Basic"
     rune.MaxHp = 10

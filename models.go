@@ -46,6 +46,7 @@ type RuneMinInfo struct {
 type Rune struct {
     RuneMinInfo
     ImageUrl string `json:"imageUrl"`
+    ThumbnailUrl string `json:"thumbnailUrl"`
     Title string `json:"title"`
     Type string `json:"type"`
     MaxHp int `json:"maxHp"`
