@@ -29,6 +29,15 @@ type CollectorResult struct {
     Collector Collector `json:"collector"`
 }
 
+// Model for internal - for GAE datastore
+type CollectorInternal struct {
+    Collector
+    CreatedTime int64
+    LastScannedTime int64
+    LastMpConsumedTime int64
+    TotalScanCount int
+}
+
 type RuneMinInfo struct {
     ISBN string `json:"ISBN"`
     OwnerGoogleId string `json:"ownerGoogleId"`

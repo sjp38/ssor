@@ -41,7 +41,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
             "</a></h1>\n</center>", APP_DOWN_URL)
 }
 
-func insertCollector(collector Collector, c appengine.Context) bool {
+func insertCollector(collector CollectorInternal, c appengine.Context) bool {
     encKey := datastore.NewKey(c, "collector",
             collector.GoogleId, 0, nil)
     _, err := datastore.Put(c, encKey, &collector)
@@ -52,9 +52,10 @@ func insertCollector(collector Collector, c appengine.Context) bool {
     return true
 }
 
-func getCollectorFromData(id string, c appengine.Context) (*Collector, bool) {
+func getCollectorFromData(id string, c appengine.Context) (
+        *CollectorInternal, bool) {
     encKey := datastore.NewKey(c, "collector", id, 0, nil)
-    collector := &Collector{}
+    collector := &CollectorInternal{}
 
     err := datastore.Get(c, encKey, collector)
     if err != nil {
@@ -121,19 +122,22 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     var collectorMinInfo CollectorMinInfo
     json.Unmarshal(body, &collectorMinInfo)
 
-    var collector Collector
+    var collectorInternal CollectorInternal
+    collectorInternal.CreatedTime = time.Now().UTC().Unix()
+
+    collector := &collectorInternal.Collector
     collector.GoogleId = collectorMinInfo.GoogleId
     collector.Email = collectorMinInfo.Email
     collector.ProfileUrl = collectorMinInfo.ProfileUrl
     collector.Nickname = collectorMinInfo.Nickname
     collector.CollectorClass = collectorMinInfo.CollectorClass
-    setCollectorInitStat(&collector)
+    setCollectorInitStat(collector)
     collector.Exp = 0
     collector.ScanCount = 5
 
-    success := insertCollector(collector, c)
+    success := insertCollector(collectorInternal, c)
 
-    respCollector(w, result{success, "Unknown"}, &collector)
+    respCollector(w, result{success, "Unknown"}, collector)
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
@@ -145,7 +149,7 @@ func getCollector(w http.ResponseWriter, r *http.Request) {
     id := r.URL.Query()["googleId"][0]
     collector, succeed := getCollectorFromData(id, c)
 
-    respCollector(w, result{succeed, "Unknown"}, collector)
+    respCollector(w, result{succeed, "Unknown"}, &collector.Collector)
 }
 
 func delCollector(w http.ResponseWriter, r *http.Request) {
@@ -161,7 +165,7 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
         res = result{false, "not exist"}
     }
 
-    respCollector(w, res, collector)
+    respCollector(w, res, &collector.Collector)
 }
 
 func insertRune(rune Rune, c appengine.Context) bool {
@@ -273,6 +277,8 @@ func getRune(w http.ResponseWriter, r *http.Request) {
             respFail(w, "scan count is not enough")
             return
         }
+        collector.LastScannedTime = time.Now().UTC().Unix()
+        collector.TotalScanCount++
         collector.ScanCount--
         succeed = insertCollector(*collector, c)
         if succeed == false {
@@ -363,7 +369,7 @@ func fight(w http.ResponseWriter, r *http.Request) {
         respFail(w, "fail to get rune")
         return
     }
-    do_fight(attacker, defender, rune)
+    do_fight(&attacker.Collector, &defender.Collector, rune)
 
     succeed = insertCollector(*attacker, c)
     if succeed == false {
@@ -378,8 +384,8 @@ func fight(w http.ResponseWriter, r *http.Request) {
 
     var fightResult FightResult
     fightResult.Success = "success"
-    fightResult.Attacker = *attacker
-    fightResult.Defender = *defender
+    fightResult.Attacker = attacker.Collector
+    fightResult.Defender = defender.Collector
     fightResult.Rune = *rune
     respInJson(w, fightResult)
 }
@@ -398,6 +404,7 @@ func healCollector(healRequest HealRequest,
         return
     }
     collector.Mp -= HEAL_MP_UNIT
+    collector.LastMpConsumedTime = time.Now().UTC().Unix()
     collector.Hp += HEAL_COLLECTOR_UNIT
     collector.Exp += HEAL_COLLECTOR_UNIT
     if collector.Hp > collector.MaxHp {
@@ -410,7 +417,7 @@ func healCollector(healRequest HealRequest,
     }
     var collectorResult CollectorResult
     collectorResult.Success = "success"
-    collectorResult.Collector = *collector
+    collectorResult.Collector = collector.Collector
     respInJson(w, collectorResult)
 }
 
@@ -434,6 +441,7 @@ func healRune(request HealRequest,
             return
         }
         collector.Mp -= HEAL_MP_UNIT
+        collector.LastMpConsumedTime = time.Now().UTC().Unix()
     } else {
         if collector.ScanCount < 1 {
             respFail(w, "scan count is not enough")
