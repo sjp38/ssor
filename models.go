@@ -29,6 +29,7 @@ type Collector struct {
     LastScannedTime int64 `json:"lastScannedTime"`
     LastMpConsumedTime int64 `json:"lastMpConsunedTime"`
     TotalScanCount int `json:"totalScanCount"`
+    GcmIds []string `json:"gcmIds"`
 }
 
 type CollectorResult struct {
@@ -85,6 +86,11 @@ type ChangeStat struct {
     Atk int `json:"atk"`
     Def int `json:"def"`
     Int int `json:"int"`
+}
+
+type GcmId struct {
+    GoogleId string `json:"googleId"`
+    GcmId string `json:"gcmId"`
 }
 
 type FailResult struct {

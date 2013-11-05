@@ -35,6 +35,7 @@ func init() {
     http.HandleFunc("/fight", fightHandler)
     http.HandleFunc("/heal", healHandler)
     http.HandleFunc("/changestat", changeStatHandler)
+    http.HandleFunc("/gcmid", gcmIdHandler)
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
@@ -573,6 +574,41 @@ func changeStat(w http.ResponseWriter, r *http.Request) {
     respInJson(w, res)
 }
 
+func registerGcmId(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    var gcmId GcmId
+    json.Unmarshal(body, &gcmId)
+
+    collector, succeed := getCollectorFromData(gcmId.GoogleId, c)
+    if succeed == false {
+        respFail(w, "fail to get collector with id " + gcmId.GoogleId)
+        return
+    }
+
+    l := len(collector.GcmIds)
+    if l + 1 > cap(collector.GcmIds) {
+        newSlice := make([]string, (l + 1) * 2)
+        copy(newSlice, collector.GcmIds)
+        collector.GcmIds = newSlice
+        log.Println("enlarged: ", cap(newSlice))
+    }
+    collector.GcmIds = collector.GcmIds[0:l + 1]
+    collector.GcmIds[l] = gcmId.GcmId
+
+    succeed = insertCollector(*collector, c)
+    if succeed == false {
+        respFail(w, "fail to update collector")
+        return
+    }
+
+    var res CollectorResult
+    res.Success ="success"
+    res.Collector = collector.Collector
+    respInJson(w, res)
+}
+
 func collectorHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
@@ -628,6 +664,15 @@ func changeStatHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case "POST":
         changeStat(w, r)
+    default:
+        fmt.Fprint(w, "not supported")
+    }
+}
+
+func gcmIdHandler(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case "POST":
+        registerGcmId(w, r)
     default:
         fmt.Fprint(w, "not supported")
     }
