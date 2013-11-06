@@ -1,4 +1,4 @@
-application: secretoftherune
+application: gcdc2013-sor
 version: 1
 runtime: go
 api_version: go1

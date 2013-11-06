@@ -4,6 +4,7 @@ import (
     "appengine"
     "appengine/datastore"
     "appengine/urlfetch"
+    "bytes"
     "encoding/json"
     "fmt"
     "io/ioutil"
@@ -25,6 +26,7 @@ const (
     HEAL_MP_UNIT = 5
     PLAYSTORE_URL = "https://play.google.com/store/apps/details?id="
     APP_DOWN_URL = PLAYSTORE_URL + APP_PACKAGE_NAME
+    GCM_PUSH_URL = "https://android.googleapis.com/gcm/send"
 )
 
 func init() {
@@ -381,6 +383,26 @@ func getRunes(w http.ResponseWriter, r *http.Request) {
     respInJson(w, runesResult)
 }
 
+func pushByGcm(c appengine.Context, pushData GcmPush) (bool, string) {
+    dat, err := json.Marshal(pushData)
+    if err != nil {
+        log.Println(err)
+        return false, "fail to marshal"
+    }
+
+    client := urlfetch.Client(c)
+    req, err := http.NewRequest("POST", GCM_PUSH_URL, bytes.NewReader(dat))
+    req.Header.Add("Authorization", "key=" + GCM_API_KEY)
+    req.Header.Add("Content-Type", "application/json")
+    resp, err := client.Do(req)
+    defer resp.Body.Close()
+    if resp.StatusCode != 200 {
+        body, _ := ioutil.ReadAll(resp.Body)
+        return false, string(body)
+    }
+    return true, "success"
+}
+
 func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
     rand.Seed(time.Now().UTC().UnixNano())
     attackPoint := attacker.Atk
@@ -445,6 +467,16 @@ func fight(w http.ResponseWriter, r *http.Request) {
     fightResult.Defender = defender.Collector
     fightResult.Rune = *rune
     respInJson(w, fightResult)
+
+    pushType := "attacked"
+    if rune.Hp == 0 {
+        pushType = "destroyed"
+    }
+    success, reason := pushByGcm(c, GcmPush{defender.GcmIds,
+            GcmPushData{pushType, rune.ISBN, attacker.GoogleId}})
+    if success == false {
+        log.Println("failed to push using GCM!", reason)
+    }
 }
 
 func healCollector(healRequest HealRequest,

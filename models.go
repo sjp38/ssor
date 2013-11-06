@@ -93,6 +93,17 @@ type GcmId struct {
     GcmId string `json:"gcmId"`
 }
 
+type GcmPushData struct {
+    Type string `json:"type"`
+    ISBN string `json:"ISBN"`
+    PeerGoogleId string `json:"peerGoogleId"`
+}
+
+type GcmPush struct {
+    RegistrationIds []string `json:"registration_ids"`
+    Data GcmPushData `json:"data"`
+}
+
 type FailResult struct {
     Success string `json:"result"`
     Reason string `json:"reason"`
