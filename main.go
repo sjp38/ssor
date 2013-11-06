@@ -41,9 +41,8 @@ func init() {
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "<center><h1>Welcome to SOR</h1><br>\n")
-    fmt.Fprintf(w, "<h1><a href=\"%s\">Download from Google play" +
-            "</a></h1>\n</center>", APP_DOWN_URL)
+    code := http.StatusFound
+    http.Redirect(w, r, "/page/index.html", code)
 }
 
 func insertCollector(collector CollectorInternal, c appengine.Context) bool {
