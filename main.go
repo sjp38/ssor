@@ -12,6 +12,7 @@ import (
     "math"
     "math/rand"
     "net/http"
+    "strconv"
     "time"
 )
 
@@ -296,7 +297,8 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
     rune.ThumbnailUrl = itemInfo.Cover_l_url
 
     rune.Title = itemInfo.Title
-    rune.Type = "Basic"
+    isbnInNumb, _ := strconv.Atoi(isbn)
+    rune.Type = string('a' + isbnInNumb % 24)
     rune.MaxHp = 10
     rune.Hp = 10
     rune.OwnerGoogleId = ""
