@@ -298,7 +298,10 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
 
     rune.Title = itemInfo.Title
     isbnInNumb, _ := strconv.Atoi(isbn)
-    rune.Type = string('a' + isbnInNumb % 24)
+    rune.Type = string('A' + isbnInNumb % 24)
+    if rune.Type == "Q" || rune.Type == "V" || rune.Type == "X" {
+        rune.Type = "P"
+    }
     rune.MaxHp = 10
     rune.Hp = 10
     rune.OwnerGoogleId = ""
