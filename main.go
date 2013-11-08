@@ -414,24 +414,29 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
     rand.Seed(time.Now().UTC().UnixNano())
     attackPoint := attacker.Atk
     attackPoint += rand.Intn(int(float32(attackPoint) * 0.1) + 1)
-    defencePoint := defender.Def
-    defencePoint += rand.Intn(int(float32(defencePoint) * 0.1) + 1)
+    defencePoint := rune.Def
+    defencePoint += rand.Intn(int(float32(defender.Def) * 0.1) + 1)
 
     damage := attackPoint - defencePoint
-    if damage > 0 {
-        attacker.Hp -= 1
-        rune.Hp -= damage
-        if rune.Hp < 0 {
-            rune.Hp = 0
-        }
-        increaseExp(attacker, damage)
-    } else {
-        attacker.Hp += damage
-        increaseExp(attacker, 1)
-        rune.Hp -= 1
-        if attacker.Hp < 0 {
-            attacker.Hp = 0
-        }
+    if damage < 1 {
+        damage = 1
+    }
+    rune.Hp -= damage
+    if rune.Hp < 0 {
+        rune.Hp = 0
+    }
+    increaseExp(attacker, damage)
+
+    attackPoint = rune.Atk + rand.Intn(int(float32(defender.Def) * 0.1) + 1)
+    defencePoint = attacker.Def +
+            rand.Intn(int(float32(attacker.Def) * 0.1) + 1)
+    damage = attackPoint - defencePoint
+    if damage < 1 {
+        damage = 1
+    }
+    attacker.Hp -= damage
+    if attacker.Hp < 0 {
+        attacker.Hp = 0
     }
 
     if rune.Hp == 0 {
