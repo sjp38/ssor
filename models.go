@@ -101,7 +101,9 @@ type GcmId struct {
 type GcmPushData struct {
     Type string `json:"type"`
     ISBN string `json:"ISBN"`
+    RuneTitle string `json"runeTitle"`
     PeerGoogleId string `json:"peerGoogleId"`
+    PeerNickname string `json:"peerNickname"`
 }
 
 type GcmPush struct {

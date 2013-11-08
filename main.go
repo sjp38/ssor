@@ -490,7 +490,8 @@ func fight(w http.ResponseWriter, r *http.Request) {
         pushType = "destroyed"
     }
     success, reason := pushByGcm(c, GcmPush{defender.GcmIds,
-            GcmPushData{pushType, rune.ISBN, attacker.GoogleId}})
+            GcmPushData{pushType, rune.ISBN, rune.Title,
+            attacker.GoogleId, attacker.Nickname}})
     if success == false {
         log.Println("failed to push using GCM!", reason)
     }
