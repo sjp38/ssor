@@ -302,8 +302,10 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
     if rune.Type == "q" || rune.Type == "v" || rune.Type == "x" {
         rune.Type = "p"
     }
-    rune.MaxHp = 10
-    rune.Hp = 10
+    rune.MaxHp = 100
+    rune.Hp = 100
+    rune.Atk = 10
+    rune.Def = 10
     rune.OwnerGoogleId = ""
     return rune, true
 }

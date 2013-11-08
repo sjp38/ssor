@@ -58,6 +58,8 @@ type Rune struct {
     Type string `json:"type"`
     MaxHp int `json:"maxHp"`
     Hp int `json:"hp"`
+    Atk int `json:"atk"`
+    Def int `json:"def"`
 }
 
 type RuneResult struct {
