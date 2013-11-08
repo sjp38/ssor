@@ -29,6 +29,9 @@ type Collector struct {
     LastScannedTime int64 `json:"lastScannedTime"`
     LastMpConsumedTime int64 `json:"lastMpConsunedTime"`
     TotalScanCount int `json:"totalScanCount"`
+    TotalAttackCount int `json:"totalAttackCount"`
+    TotalDestroyCount int `json:"totalDestroyCount"`
+    TotalHealCount int `json:"totalHealCount"`
     GcmIds []string `json:"gcmIds"`
 }
 

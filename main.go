@@ -408,6 +408,7 @@ func pushByGcm(c appengine.Context, pushData GcmPush) (bool, string) {
 }
 
 func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
+    attacker.TotalAttackCount += 1
     rand.Seed(time.Now().UTC().UnixNano())
     attackPoint := attacker.Atk
     attackPoint += rand.Intn(int(float32(attackPoint) * 0.1) + 1)
@@ -429,6 +430,10 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
         if attacker.Hp < 0 {
             attacker.Hp = 0
         }
+    }
+
+    if rune.Hp == 0 {
+        attacker.TotalDestroyCount += 1
     }
 }
 
@@ -504,6 +509,7 @@ func healCollector(healRequest HealRequest,
     if collector.Hp > collector.MaxHp {
         collector.Hp = collector.MaxHp
     }
+    collector.TotalHealCount += 1
     succeed = insertCollector(*collector, c)
     if succeed == false {
         respFail(w, "fail to update healed collector")
@@ -548,6 +554,7 @@ func healRune(request HealRequest,
     if rune.Hp > rune.MaxHp {
         rune.Hp = rune.MaxHp
     }
+    collector.TotalHealCount += 1
     succeed = insertCollector(*collector, c)
     if succeed == false {
         respFail(w, "fail to update consumed collector")
