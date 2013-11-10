@@ -147,6 +147,12 @@ func setCollectorInitStat(collector *Collector) {
     case "Dork":
         doSetCollectorInitStat(collector, 100,100,5,10,10)
     }
+    collector.Level = 1
+    collector.ExpToNext = collector.Level * 100 +
+            int(math.Pow(8, float64(collector.Level - 1)))
+    collector.Exp = 0
+    collector.ScanCount = 5
+    collector.BonusPoint = 0
 }
 
 func createCollector(w http.ResponseWriter, r *http.Request) {
@@ -168,12 +174,6 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     collector := &collectorInternal.Collector
     collector.CollectorMinInfo = collectorMinInfo
     setCollectorInitStat(collector)
-    collector.Level = 1
-    collector.ExpToNext = collector.Level * 100 +
-            int(math.Pow(8, float64(collector.Level - 1)))
-    collector.Exp = 0
-    collector.ScanCount = 5
-    collector.BonusPoint = 0
 
     success := insertCollector(collectorInternal, c)
 
