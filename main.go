@@ -47,8 +47,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 }
 
 func insertCollector(collector CollectorInternal, c appengine.Context) bool {
-    encKey := datastore.NewKey(c, "collector",
-            collector.GoogleId, 0, nil)
+    encKey := datastore.NewKey(c, "collector", collector.GoogleId, 0, nil)
     _, err := datastore.Put(c, encKey, &collector)
     if nil != err {
         log.Println(err)
