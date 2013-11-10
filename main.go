@@ -186,7 +186,25 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateCollector(w http.ResponseWriter, r *http.Request) {
-    createCollector(w, r);
+    c := appengine.NewContext(r)
+    defer r.Body.Close()
+    body, _ := ioutil.ReadAll(r.Body)
+    var collectorMinInfo CollectorMinInfo
+    json.Unmarshal(body, &collectorMinInfo)
+
+    collector, exist := getCollectorFromData(collectorMinInfo.GoogleId, c)
+    if exist == false {
+        respCollector(w, result{false,
+                "Collector with the id does not exist"}, nil)
+        return
+    }
+
+    collector.Collector.CollectorMinInfo = collectorMinInfo
+    success := insertCollector(*collector, c)
+
+    respCollector(w, result{success, "fail to insert updated collector"},
+            &collector.Collector)
+
 }
 
 func getCollector(w http.ResponseWriter, r *http.Request) {
