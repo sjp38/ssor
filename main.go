@@ -166,11 +166,7 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     collectorInternal.CreatedTime = time.Now().UTC().Unix()
 
     collector := &collectorInternal.Collector
-    collector.GoogleId = collectorMinInfo.GoogleId
-    collector.Email = collectorMinInfo.Email
-    collector.ProfileUrl = collectorMinInfo.ProfileUrl
-    collector.Nickname = collectorMinInfo.Nickname
-    collector.CollectorClass = collectorMinInfo.CollectorClass
+    collector.CollectorMinInfo = collectorMinInfo
     setCollectorInitStat(collector)
     collector.Level = 1
     collector.ExpToNext = collector.Level * 100 +
