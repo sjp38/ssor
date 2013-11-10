@@ -157,6 +157,12 @@ func createCollector(w http.ResponseWriter, r *http.Request) {
     var collectorMinInfo CollectorMinInfo
     json.Unmarshal(body, &collectorMinInfo)
 
+    _, exist := getCollectorFromData(collectorMinInfo.GoogleId, c)
+    if exist == true {
+        respCollector(w, result{false, "Same id already exist"}, nil)
+        return
+    }
+
     var collectorInternal CollectorInternal
     collectorInternal.CreatedTime = time.Now().UTC().Unix()
 
