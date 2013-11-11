@@ -428,7 +428,12 @@ func pushByGcm(c appengine.Context, pushData GcmPush) (bool, string) {
     return true, "success"
 }
 
-func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
+func do_fight(attacker *Collector, defender *Collector, rune *Rune) (
+        bool, string) {
+    if attacker.Hp < 1 {
+        return false, "HP is already 0"
+    }
+
     attacker.TotalAttackCount += 1
     rand.Seed(time.Now().UTC().UnixNano())
     attackPoint := attacker.Atk
@@ -461,6 +466,7 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) {
     if rune.Hp == 0 {
         attacker.TotalDestroyCount += 1
     }
+    return true, ""
 }
 
 func fight(w http.ResponseWriter, r *http.Request) {
@@ -484,7 +490,10 @@ func fight(w http.ResponseWriter, r *http.Request) {
         respFail(w, "fail to get rune")
         return
     }
-    do_fight(&attacker.Collector, &defender.Collector, rune)
+    succeed, reason := do_fight(&attacker.Collector, &defender.Collector, rune)
+    if succeed == false {
+        respFail(w, reason)
+    }
 
     succeed = insertCollector(*attacker, c)
     if succeed == false {
