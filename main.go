@@ -226,10 +226,10 @@ func delCollector(w http.ResponseWriter, r *http.Request) {
     respCollector(w, res, &collector.Collector)
 }
 
-func insertRune(rune Rune, c appengine.Context) bool {
+func insertRune(rune_ Rune, c appengine.Context) bool {
     encKey := datastore.NewKey(c, "rune",
-            rune.ISBN, 0, nil)
-    _, err := datastore.Put(c, encKey, &rune)
+            rune_.ISBN, 0, nil)
+    _, err := datastore.Put(c, encKey, &rune_)
     if nil != err {
         log.Println(err)
         return false
@@ -239,14 +239,14 @@ func insertRune(rune Rune, c appengine.Context) bool {
 
 func getRuneFromData(isbn string, c appengine.Context) (*Rune, bool) {
     encKey := datastore.NewKey(c, "rune", isbn, 0, nil)
-    rune := &Rune{}
+    rune_ := &Rune{}
 
-    err := datastore.Get(c, encKey, rune)
+    err := datastore.Get(c, encKey, rune_)
     if err != nil {
         log.Println(err)
-        return rune, false
+        return rune_, false
     }
-    return rune, true
+    return rune_, true
 }
 
 func setRuneOwner(w http.ResponseWriter, r *http.Request) {
@@ -256,13 +256,13 @@ func setRuneOwner(w http.ResponseWriter, r *http.Request) {
     var runeMinInfo RuneMinInfo
     json.Unmarshal(body, &runeMinInfo)
 
-    rune, succeed := getRuneFromData(runeMinInfo.ISBN, c)
+    rune_, succeed := getRuneFromData(runeMinInfo.ISBN, c)
     if succeed == false {
         respFail(w, "fail to get rune from datastore")
         return
     }
-    rune.OwnerGoogleId = runeMinInfo.OwnerGoogleId
-    succeed = insertRune(*rune, c)
+    rune_.OwnerGoogleId = runeMinInfo.OwnerGoogleId
+    succeed = insertRune(*rune_, c)
     if succeed == false {
         respFail(w, "fail to updated info to datastore")
         return
@@ -270,14 +270,14 @@ func setRuneOwner(w http.ResponseWriter, r *http.Request) {
 
     var runeResult RuneResult
     runeResult.Success = "success"
-    runeResult.Rune = *rune
+    runeResult.Rune = *rune_
     respInJson(w, runeResult)
 }
 
-func registerRune(w http.ResponseWriter, r *http.Request, rune Rune) bool {
+func registerRune(w http.ResponseWriter, r *http.Request, rune_ Rune) bool {
     c := appengine.NewContext(r)
 
-    success := insertRune(rune, c)
+    success := insertRune(rune_, c)
     if success == false {
         return false
     }
@@ -285,7 +285,7 @@ func registerRune(w http.ResponseWriter, r *http.Request, rune Rune) bool {
 }
 
 func makeRune(c appengine.Context, isbn string) (Rune, bool) {
-    var rune Rune
+    var rune_ Rune
     searchUrl := "http://apis.daum.net/search/book"
     searchUrl += "?output=json&apikey=" + daumApiKey
     searchUrl += "&q=" + isbn
@@ -294,7 +294,7 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
     resp, err := client.Get(searchUrl)
     if err != nil {
         log.Print(err)
-        return rune, false
+        return rune_, false
     }
     defer resp.Body.Close()
 
@@ -302,31 +302,31 @@ func makeRune(c appengine.Context, isbn string) (Rune, bool) {
     var searchResult DaumBookSearchResult
     json.Unmarshal(body, &searchResult)
     if len(searchResult.Channel.Item) <= 0 {
-        return rune, false
+        return rune_, false
     }
     itemInfo := searchResult.Channel.Item[0]
 
-    rune.ISBN = isbn
+    rune_.ISBN = isbn
 
     imageUrl := itemInfo.Cover_l_url
     imageUrl = imageUrl[0:len("http://book.daum-img.net/")] +
             "image" + imageUrl[len("http://book.daum-img.net/R110x160"):]
-    rune.ImageUrl = imageUrl
+    rune_.ImageUrl = imageUrl
 
-    rune.ThumbnailUrl = itemInfo.Cover_l_url
+    rune_.ThumbnailUrl = itemInfo.Cover_l_url
 
-    rune.Title = itemInfo.Title
+    rune_.Title = itemInfo.Title
     isbnInNumb, _ := strconv.Atoi(isbn)
-    rune.Type = string('a' + isbnInNumb % 24)
-    if rune.Type == "q" || rune.Type == "v" || rune.Type == "x" {
-        rune.Type = "p"
+    rune_.Type = string('a' + isbnInNumb % 24)
+    if rune_.Type == "q" || rune_.Type == "v" || rune_.Type == "x" {
+        rune_.Type = "p"
     }
-    rune.MaxHp = 100
-    rune.Hp = 100
-    rune.Atk = 10
-    rune.Def = 10
-    rune.OwnerGoogleId = ""
-    return rune, true
+    rune_.MaxHp = 100
+    rune_.Hp = 100
+    rune_.Atk = 10
+    rune_.Def = 10
+    rune_.OwnerGoogleId = ""
+    return rune_, true
 }
 
 func increaseExp(collector *Collector, exp int) {
@@ -371,7 +371,7 @@ func getRune(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    rune, succeed := getRuneFromData(isbn, c)
+    rune_, succeed := getRuneFromData(isbn, c)
     if succeed == false {
         log.Println("fail to get rune from datastore. make it!")
         newRune, succeed := makeRune(c, isbn)
@@ -381,11 +381,11 @@ func getRune(w http.ResponseWriter, r *http.Request) {
         }
         log.Println("made rune. register it!!")
         registerRune(w, r, newRune)
-        *rune = newRune
+        *rune_ = newRune
     }
     var runeResult RuneResult
     runeResult.Success = "success"
-    runeResult.Rune = *rune
+    runeResult.Rune = *rune_
     respInJson(w, runeResult)
 }
 
@@ -428,7 +428,7 @@ func pushByGcm(c appengine.Context, pushData GcmPush) (bool, string) {
     return true, "success"
 }
 
-func do_fight(attacker *Collector, defender *Collector, rune *Rune) (
+func do_fight(attacker *Collector, defender *Collector, rune_ *Rune) (
         bool, string) {
     if attacker.Hp < 1 {
         return false, "HP is already 0"
@@ -438,20 +438,20 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) (
     rand.Seed(time.Now().UTC().UnixNano())
     attackPoint := attacker.Atk
     attackPoint += rand.Intn(int(float32(attackPoint) * 0.1) + 1)
-    defencePoint := rune.Def
+    defencePoint := rune_.Def
     defencePoint += rand.Intn(int(float32(defender.Def) * 0.1) + 1)
 
     damage := attackPoint - defencePoint
     if damage < 1 {
         damage = 1
     }
-    rune.Hp -= damage
-    if rune.Hp < 0 {
-        rune.Hp = 0
+    rune_.Hp -= damage
+    if rune_.Hp < 0 {
+        rune_.Hp = 0
     }
     increaseExp(attacker, damage)
 
-    attackPoint = rune.Atk + rand.Intn(int(float32(defender.Def) * 0.1) + 1)
+    attackPoint = rune_.Atk + rand.Intn(int(float32(defender.Def) * 0.1) + 1)
     defencePoint = attacker.Def +
             rand.Intn(int(float32(attacker.Def) * 0.1) + 1)
     damage = attackPoint - defencePoint
@@ -463,7 +463,7 @@ func do_fight(attacker *Collector, defender *Collector, rune *Rune) (
         attacker.Hp = 0
     }
 
-    if rune.Hp == 0 {
+    if rune_.Hp == 0 {
         attacker.TotalDestroyCount += 1
     }
     return true, ""
@@ -485,12 +485,12 @@ func fight(w http.ResponseWriter, r *http.Request) {
         respFail(w, "fail to get defender")
         return
     }
-    rune, succeed := getRuneFromData(isbn, c)
+    rune_, succeed := getRuneFromData(isbn, c)
     if succeed == false {
         respFail(w, "fail to get rune")
         return
     }
-    succeed, reason := do_fight(&attacker.Collector, &defender.Collector, rune)
+    succeed, reason := do_fight(&attacker.Collector, &defender.Collector, rune_)
     if succeed == false {
         respFail(w, reason)
     }
@@ -500,7 +500,7 @@ func fight(w http.ResponseWriter, r *http.Request) {
         respFail(w, "fail to update attacker")
         return
     }
-    succeed = insertRune(*rune, c)
+    succeed = insertRune(*rune_, c)
     if succeed == false {
         respFail(w, "fail to update rune")
         return
@@ -510,15 +510,15 @@ func fight(w http.ResponseWriter, r *http.Request) {
     fightResult.Success = "success"
     fightResult.Attacker = attacker.Collector
     fightResult.Defender = defender.Collector
-    fightResult.Rune = *rune
+    fightResult.Rune = *rune_
     respInJson(w, fightResult)
 
     pushType := "attacked"
-    if rune.Hp == 0 {
+    if rune_.Hp == 0 {
         pushType = "destroyed"
     }
     success, reason := pushByGcm(c, GcmPush{defender.GcmIds,
-            GcmPushData{pushType, rune.ISBN, rune.Title,
+            GcmPushData{pushType, rune_.ISBN, rune_.Title,
             attacker.GoogleId, attacker.Nickname}})
     if success == false {
         log.Println("failed to push using GCM!", reason)
@@ -560,12 +560,12 @@ func healCollector(healRequest HealRequest,
 func healRune(request HealRequest,
         w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
-    rune, succeed := getRuneFromData(request.ISBN, c)
+    rune_, succeed := getRuneFromData(request.ISBN, c)
     if succeed == false {
         respFail(w, "fail to get rune from datastore")
         return
     }
-    collector, succeed := getCollectorFromData(rune.OwnerGoogleId, c)
+    collector, succeed := getCollectorFromData(rune_.OwnerGoogleId, c)
     if succeed == false {
         respFail(w, "fail to get collector from datastore")
         return
@@ -585,10 +585,10 @@ func healRune(request HealRequest,
         }
         collector.ScanCount--
     }
-    rune.Hp += HEAL_RUNE_UNIT
+    rune_.Hp += HEAL_RUNE_UNIT
     increaseExp(&collector.Collector, HEAL_RUNE_UNIT)
-    if rune.Hp > rune.MaxHp {
-        rune.Hp = rune.MaxHp
+    if rune_.Hp > rune_.MaxHp {
+        rune_.Hp = rune_.MaxHp
     }
     collector.TotalHealCount += 1
     succeed = insertCollector(*collector, c)
@@ -596,14 +596,14 @@ func healRune(request HealRequest,
         respFail(w, "fail to update consumed collector")
         return
     }
-    succeed = insertRune(*rune, c)
+    succeed = insertRune(*rune_, c)
     if succeed == false {
         respFail(w, "fail to update healed rune")
         return
     }
     var runeResult RuneResult
     runeResult.Success = "success"
-    runeResult.Rune = *rune
+    runeResult.Rune = *rune_
     respInJson(w, runeResult)
 }
 
